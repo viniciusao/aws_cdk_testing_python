@@ -1,4 +1,8 @@
-from aws_cdk.assertions import Template, Match
+import json
+import re
+
+from aws_cdk.assertions import Capture, Match, Template
+import pytest
 
 from ddb.dynamodb import DynamoDb
 from tests import app
@@ -25,3 +29,24 @@ def test_table_name():
     )
 
 # creating creating
+
+@pytest.fixture
+def test_outputs():
+    outputs_values = Capture()
+    return template.find_outputs('*', props=outputs_values)
+
+
+def test_outputs_logical_ids(test_outputs):
+    found = []
+    for output in test_outputs:
+        found.append(re.search('(TableName|TableArn)', output))
+    assert all(found)
+
+def test_outputs_values(test_outputs):
+    found = []
+    for output in test_outputs.values():
+        value = output['Value']
+        value_toassert = json.dumps(value)
+        found.append(re.search('(Ref|Arn)', value_toassert))
+
+    assert all(found)

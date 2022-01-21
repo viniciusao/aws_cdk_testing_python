@@ -13,9 +13,11 @@ class DynamoDb(cdk.Stack):
             name='pytest',
             type=ddb.AttributeType.STRING
         )
-        ddb.Table(
+        table = ddb.Table(
             self,
             'Table',
             partition_key=pk,
             table_name='pytest'
         )
+        cdk.CfnOutput(self, 'TableName', value=table.table_name)
+        cdk.CfnOutput(self, 'TableArn', value=table.table_arn)
